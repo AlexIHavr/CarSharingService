@@ -1,8 +1,8 @@
 import { DataTypes } from 'sequelize';
-import sequelizeRepository from '../repositories/sequelizeRepository.js';
+import sequelize from '../config/config.js';
 import driverModel from './driverModel.js';
 
-const runModel = sequelizeRepository.sequelize.define(
+const runModel = sequelize.define(
   'Run',
   {
     id: {

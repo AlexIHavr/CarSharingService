@@ -1,42 +1,66 @@
-import { Op } from 'sequelize';
-import bookingModel from '../models/bookingModel.js';
+import { FREE, IN_SERVICE, IN_USE, RESERVED, UNAVAILABLE } from '../constants/statuses.js';
+import ApiError from '../errors/ApiError.js';
 import carModel from '../models/carModel.js';
 import driverModel from '../models/driverModel.js';
 import runModel from '../models/runModel.js';
-import BaseService from './baseService.js';
 import driverService from './driverService.js';
-import runService from './runService.js';
+import filterService from './filterService.js';
 
-class CarService extends BaseService {
-  constructor() {
-    super(carModel);
-  }
-
-  async addCar(data) {
+class CarService {
+  async add(data) {
     const newCar = await carModel.create(data);
     return newCar;
   }
 
-  async setInUseCar(carId) {
-    const car = await super.getOneModel({ id: carId });
-    const run = await runService.getOneModel({ id: car.currentRun });
+  async setStatus({ status, filter }) {
+    const parsedFilter = filterService.parseFilter(filter);
 
-    await driverService.getDriverCreditCard(run.driver);
+    let cars = await carModel.findAll(parsedFilter);
 
-    await car.update({ status: 'in use' });
+    for (let car of cars) {
+      switch (status) {
+        case FREE:
+        case UNAVAILABLE:
+        case RESERVED:
+        case IN_SERVICE:
+          if (car.status === IN_USE) {
+            throw new ApiError.BadRequest('Car is using now.');
+          }
+
+          await car.update({ status });
+          break;
+        case IN_USE:
+          car = await this.setInUseStatus(car);
+          break;
+      }
+    }
+
+    return cars;
+  }
+
+  async setInUseStatus(car) {
+    const run = await runModel.findByPk(car.currentRun);
+
+    const driverCreditCard = await driverService.getDriverCreditCard(run?.driver);
+
+    if (!driverCreditCard) {
+      throw ApiError.BadRequest('Driver credit card has not been authorized.');
+    }
+
+    await car.update({ status: IN_USE });
 
     return car;
   }
 
-  async getUsingFewFuelCars() {
+  async getCarsByFilter(filter) {
     const cars = await carModel.findAll({
-      where: { status: 'in use', fuelLevel: { [Op.lt]: 25 } },
+      where: filterService.parseFilter(filter),
     });
 
     return cars;
   }
 
-  async getReservedUnpaidCars() {
+  async getReservedUnpaid() {
     const reservedCars = await carModel.findAll({
       where: { status: 'reserved' },
     });
@@ -61,66 +85,37 @@ class CarService extends BaseService {
     return reservedUnpaidCars;
   }
 
-  async setInServiceCar() {
-    const oldCars = await carModel.findAll({
-      where: {
-        mileage: { [Op.gt]: 100000 },
-        productionDate: { [Op.lt]: new Date('01-01-2017') },
-      },
+  async setCoordinates({ filter, latitude, longitude }) {
+    let cars = await carModel.findAll({
+      where: filterService.parseFilter(filter),
     });
 
-    for (let car of oldCars) {
-      car.status = 'in Service';
+    for (let car of cars) {
+      car.geoLatitude = latitude;
+      car.geoLongitude = longitude;
+
       await car.save();
     }
 
-    return oldCars;
-  }
-
-  async setCoordinatesCar() {
-    let updatedCars = await carModel.findAll({
-      where: {
-        status: {
-          [Op.notIn]: ['in use', 'reserved'],
-        },
-      },
-    });
-
-    const twoTimesBookingCars = [];
-
-    for (let updatedCar of updatedCars) {
-      const bookingCar = await bookingModel.findAll({
-        where: { car: updatedCar.id },
-      });
-
-      if (bookingCar.length > 1) {
-        twoTimesBookingCars.push(updatedCar);
-        updatedCar.geoLatitude = 53.8882836;
-        updatedCar.geoLongitude = 27.5442615;
-
-        await updatedCar.save();
-      }
-    }
-
-    return twoTimesBookingCars;
+    return cars;
   }
 
   async setCarCurrentRun(carId, currentRunId) {
-    await carModel.update(
-      { currentRun: currentRunId, status: 'reserved' },
-      { where: { id: carId } }
-    );
+    await carModel.update({ currentRun: currentRunId, status: RESERVED }, { where: { id: carId } });
   }
 
-  async removeCarCurrentRun(carId) {
-    await carModel.update({ currentRun: null, status: 'free' }, { where: { id: carId } });
+  async removeCurrentRun(carId) {
+    await carModel.update({ currentRun: null, status: FREE }, { where: { id: carId } });
   }
 
-  async removeCar(VIN) {
-    const car = await super.getOneModel({ VIN: VIN ?? '' });
-    await car.destroy();
+  async remove(filter) {
+    const cars = await carModel.findAll(filter);
 
-    return car;
+    for (let car of cars) {
+      await car.destroy();
+    }
+
+    return cars;
   }
 }
 

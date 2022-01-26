@@ -1,17 +1,18 @@
+import { FREE } from '../constants/statuses.js';
 import ApiError from '../errors/ApiError.js';
+import carModel from '../models/carModel.js';
 import runModel from '../models/runModel.js';
-import BaseService from './baseService.js';
 import carService from './carService.js';
 
-class RunService extends BaseService {
-  constructor() {
-    super(runModel);
-  }
+class RunService {
+  async add(data) {
+    const car = await carModel.findByPk(data.carId);
 
-  async addRun(data) {
-    const car = await carService.getOneModel({ id: data.carId });
+    if (!car) {
+      throw new ApiError.BadRequest('Car does not exist.');
+    }
 
-    if (car.status !== 'free') {
+    if (car.status !== FREE) {
       throw ApiError.BadRequest('Car must be free.');
     }
 

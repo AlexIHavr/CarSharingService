@@ -1,9 +1,9 @@
 import bookingService from '../services/bookingService.js';
 
 class BookingController {
-  async addBooking(req, res, next) {
+  async add(req, res, next) {
     try {
-      const newCreditCard = await bookingService.addBooking(req.body);
+      const newCreditCard = await bookingService.add(req.body);
       res.json(newCreditCard);
     } catch (err) {
       next(err);

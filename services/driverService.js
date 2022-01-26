@@ -1,13 +1,7 @@
-import ApiError from '../errors/ApiError.js';
 import driverModel from '../models/driverModel.js';
-import BaseService from './baseService.js';
 
-class DriverService extends BaseService {
-  constructor() {
-    super(driverModel);
-  }
-
-  async addDriver(data) {
+class DriverService {
+  async add(data) {
     const newDriver = await driverModel.create(data);
     return newDriver;
   }
@@ -17,13 +11,9 @@ class DriverService extends BaseService {
   }
 
   async getDriverCreditCard(driverId) {
-    const driver = await super.getOneModel({ id: driverId });
+    const driver = await driverModel.findByPk(driverId);
 
-    if (!driver.creditCard) {
-      throw ApiError.BadRequest('Driver credit card has not been authorized.');
-    }
-
-    return driver.creditCard;
+    return driver?.creditCard;
   }
 }
 

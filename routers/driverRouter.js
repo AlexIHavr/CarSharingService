@@ -3,6 +3,6 @@ import driverController from '../controllers/driverController.js';
 
 const driverRouter = Router();
 
-driverRouter.post('/addDriver', driverController.addDriver);
+driverRouter.post('/add', driverController.add);
 
 export default driverRouter;

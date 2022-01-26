@@ -2,30 +2,39 @@ import { Router } from 'express';
 import carController from '../controllers/carController.js';
 import roleMiddleware from '../middlewares/roleMiddleware.js';
 import validationMiddleware from '../middlewares/validationMiddleware.js';
-import { ADMIN, USER } from '../roles/roles.js';
-import validationFieldSchemas from '../schemas/validationFieldSchemas.js';
+import { ADMIN, USER } from '../constants/roles.js';
+import validationSchemas from '../schemas/validationSchemas.js';
 
 const carRouter = Router();
 
-carRouter.get('/getUsingFewFuelCars', roleMiddleware([USER]), carController.getUsingFewFuelCars);
 carRouter.get(
-  '/getReservedUnpaidCars',
-  roleMiddleware([USER]),
-  carController.getReservedUnpaidCars
+  '/getCarsByFilter',
+  roleMiddleware([ADMIN]),
+  validationMiddleware(validationSchemas.carsByFilterSchema),
+  carController.getCarsByFilter
 );
+carRouter.get('/getReservedUnpaid', roleMiddleware([ADMIN]), carController.getReservedUnpaid);
 
-carRouter.post('/addCar', roleMiddleware([ADMIN]), carController.addCar);
+carRouter.post('/add', roleMiddleware([ADMIN]), carController.add);
 
 carRouter.put(
-  '/setInUseCar',
-  roleMiddleware([USER]),
-  validationMiddleware([validationFieldSchemas.getIdFieldSchema('carId')]),
-  carController.setInUseCar
+  '/setStatus',
+  roleMiddleware([ADMIN]),
+  validationMiddleware(validationSchemas.carStatusSchema),
+  carController.setStatus
+);
+carRouter.put(
+  '/setCoordinates',
+  roleMiddleware([ADMIN]),
+  validationMiddleware(validationSchemas.coordinatesSchema),
+  carController.setCoordinates
 );
 
-carRouter.put('/setInServiceCar', roleMiddleware([ADMIN]), carController.setInServiceCar);
-carRouter.put('/setCoordinatesCar', roleMiddleware([ADMIN]), carController.setCoordinatesCar);
-
-carRouter.delete('/removeCar', roleMiddleware([ADMIN]), carController.removeCar);
+carRouter.delete(
+  '/remove',
+  roleMiddleware([ADMIN]),
+  validationMiddleware(validationSchemas.carsByFilterSchema),
+  carController.remove
+);
 
 export default carRouter;

@@ -1,9 +1,9 @@
 import { DataTypes } from 'sequelize';
-import sequelizeRepository from '../repositories/sequelizeRepository.js';
+import sequelize from '../config/config.js';
 import carModel from './carModel.js';
 import runModel from './runModel.js';
 
-const bookingModel = sequelizeRepository.sequelize.define('Booking', {
+const bookingModel = sequelize.define('Booking', {
   id: {
     type: DataTypes.UUID,
     primaryKey: true,

@@ -1,7 +1,6 @@
 import ApiError from '../errors/ApiError.js';
 
 const sqlErrorMiddleware = (err, req, res, next) => {
-  console.log(err);
   switch (err.name) {
     case 'SequelizeValidationError':
     case 'SequelizeUniqueConstraintError':

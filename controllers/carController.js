@@ -1,18 +1,18 @@
 import carService from '../services/carService.js';
 
 class CarController {
-  async getUsingFewFuelCars(req, res, next) {
+  async getCarsByFilter(req, res, next) {
     try {
-      const cars = await carService.getUsingFewFuelCars();
+      const cars = await carService.getCarsByFilter(req.body.filter);
       res.json(cars);
     } catch (err) {
       next(err);
     }
   }
 
-  async getReservedUnpaidCars(req, res, next) {
+  async getReservedUnpaid(req, res, next) {
     try {
-      const reservedUnpaidCars = await carService.getReservedUnpaidCars();
+      const reservedUnpaidCars = await carService.getReservedUnpaid();
 
       res.json(reservedUnpaidCars);
     } catch (err) {
@@ -20,37 +20,28 @@ class CarController {
     }
   }
 
-  async addCar(req, res, next) {
+  async add(req, res, next) {
     try {
-      const newCar = await carService.addCar(req.body);
+      const newCar = await carService.add(req.body);
       res.json(newCar);
     } catch (err) {
       next(err);
     }
   }
 
-  async setInUseCar(req, res, next) {
+  async setStatus(req, res, next) {
     try {
-      const car = await carService.setInUseCar(req.body.carId);
-      res.json(car);
+      const cars = await carService.setStatus(req.body);
+
+      res.json(cars);
     } catch (err) {
       next(err);
     }
   }
 
-  async setInServiceCar(req, res, next) {
+  async setCoordinates(req, res, next) {
     try {
-      const oldCars = await carService.setInServiceCar();
-
-      res.json(oldCars);
-    } catch (err) {
-      next(err);
-    }
-  }
-
-  async setCoordinatesCar(req, res, next) {
-    try {
-      const updatedCars = await carService.setCoordinatesCar();
+      const updatedCars = await carService.setCoordinates(req.body);
 
       res.json(updatedCars);
     } catch (err) {
@@ -58,9 +49,9 @@ class CarController {
     }
   }
 
-  async removeCar(req, res, next) {
+  async remove(req, res, next) {
     try {
-      const car = await carService.removeCar(req.body.VIN);
+      const car = await carService.remove(req.body.filter);
 
       res.json(car);
     } catch (err) {

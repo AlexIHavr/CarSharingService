@@ -1,9 +1,9 @@
 import { DataTypes } from 'sequelize';
-import sequelizeRepository from '../repositories/sequelizeRepository.js';
-import driverModel from './driverModel.js';
+import sequelize from '../config/config.js';
+import statuses from '../constants/statuses.js';
 import runModel from './runModel.js';
 
-const carModel = sequelizeRepository.sequelize.define('Car', {
+const carModel = sequelize.define('Car', {
   id: {
     type: DataTypes.UUID,
     primaryKey: true,
@@ -68,8 +68,8 @@ const carModel = sequelizeRepository.sequelize.define('Car', {
     allowNull: false,
     validate: {
       isIn: {
-        args: [['reserved', 'in use', 'unavailable', 'in Service', 'free']],
-        msg: 'Status must be one of these: reserved, in use, unavailable, in Service, free',
+        args: [statuses],
+        msg: `Status must be one of these: ${statuses}`,
       },
     },
   },

@@ -1,9 +1,9 @@
 import creditCardService from '../services/creditCardService.js';
 
 class CreditCardController {
-  async addCreditCard(req, res, next) {
+  async add(req, res, next) {
     try {
-      const newCreditCard = await creditCardService.addCreditCard(req.body);
+      const newCreditCard = await creditCardService.add(req.body);
       res.json(newCreditCard);
     } catch (err) {
       next(err);

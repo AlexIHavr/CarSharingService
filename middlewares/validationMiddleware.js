@@ -1,17 +1,18 @@
 import ApiError from '../errors/ApiError.js';
 
-const validationMiddleware = (fieldSchemas) => {
+const validationMiddleware = (schema) => {
   return function (req, res, next) {
-    let errors = [];
+    const schemaKeys = Array.from(schema._ids._byKey.keys());
 
-    fieldSchemas.forEach(({ field, schema }) => {
-      const error = schema.validate({ [field]: req.body[field] }).error;
+    const reqFields = schemaKeys.reduce((obj, field) => {
+      obj[field] = req.body[field];
+      return obj;
+    }, {});
 
-      if (error) errors.push(error.message);
-    });
+    const { error } = schema.validate(reqFields);
 
-    if (errors.length) {
-      return next(ApiError.BadRequest(errors.join('; ')));
+    if (error) {
+      return next(ApiError.BadRequest(error.message));
     }
 
     next();

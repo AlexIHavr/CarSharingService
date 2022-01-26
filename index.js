@@ -1,12 +1,9 @@
 import express from 'express';
-import dotenv from 'dotenv';
 import helmet from 'helmet';
 import baseRouter from './routers/baseRouter.js';
-import sequelizeRepository from './repositories/sequelizeRepository.js';
+import SequelizeRepository from './repositories/SequelizeRepository.js';
 import errorMiddleware from './middlewares/errorMiddleware.js';
 import sqlErrorMiddleware from './middlewares/sqlErrorMiddleware.js';
-
-dotenv.config();
 
 const app = express();
 
@@ -19,6 +16,6 @@ app.use(sqlErrorMiddleware);
 app.use(errorMiddleware);
 
 app.listen(process.env.PORT, async () => {
-  await sequelizeRepository.connectDB();
+  await SequelizeRepository.connectDB();
   console.log(`Server has been started on port ${process.env.PORT} ...`);
 });

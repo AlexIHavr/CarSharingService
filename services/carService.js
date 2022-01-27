@@ -1,9 +1,6 @@
-import { FREE, IN_SERVICE, IN_USE, RESERVED, UNAVAILABLE } from '../constants/statuses.js';
+import { FREE, IN_USE, RESERVED } from '../constants/statuses.js';
 import ApiError from '../errors/ApiError.js';
 import carModel from '../models/carModel.js';
-import driverModel from '../models/driverModel.js';
-import runModel from '../models/runModel.js';
-import driverService from './driverService.js';
 import filterService from './filterService.js';
 
 class CarService {
@@ -13,43 +10,31 @@ class CarService {
   }
 
   async setStatus({ status, filter }) {
-    const parsedFilter = filterService.parseFilter(filter);
-
-    let cars = await carModel.findAll(parsedFilter);
+    let cars = await carModel.findAll({ where: filterService.parseFilter(filter) });
 
     for (let car of cars) {
-      switch (status) {
-        case FREE:
-        case UNAVAILABLE:
-        case RESERVED:
-        case IN_SERVICE:
-          if (car.status === IN_USE) {
-            throw new ApiError.BadRequest('Car is using now.');
-          }
-
-          await car.update({ status });
-          break;
-        case IN_USE:
-          car = await this.setInUseStatus(car);
-          break;
+      if (car.status === IN_USE) {
+        throw ApiError.BadRequest('Car is using now.');
       }
+
+      if (status === IN_USE) {
+        const currentRun = await car.getRun();
+        if (!currentRun) {
+          throw ApiError.BadRequest(`Car with id '${car.id}' has not current run.`);
+        }
+
+        const driver = await currentRun.getDriver();
+        if (!driver.creditCard) {
+          throw ApiError.BadRequest(
+            `Credit card of driver with id '${driver.id}' has not been authorized.`
+          );
+        }
+      }
+
+      await car.update({ status });
     }
 
     return cars;
-  }
-
-  async setInUseStatus(car) {
-    const run = await runModel.findByPk(car.currentRun);
-
-    const driverCreditCard = await driverService.getDriverCreditCard(run?.driver);
-
-    if (!driverCreditCard) {
-      throw ApiError.BadRequest('Driver credit card has not been authorized.');
-    }
-
-    await car.update({ status: IN_USE });
-
-    return car;
   }
 
   async getCarsByFilter(filter) {
@@ -62,14 +47,14 @@ class CarService {
 
   async getReservedUnpaid() {
     const reservedCars = await carModel.findAll({
-      where: { status: 'reserved' },
+      where: { status: RESERVED },
     });
 
     const reservedUnpaidCars = [];
 
     for (const car of reservedCars) {
-      const currentRun = await runModel.findByPk(car.currentRun);
-      const driver = await driverModel.findByPk(currentRun.driver);
+      const currentRun = await car.getRun();
+      const driver = await currentRun.getDriver();
 
       if (!driver.creditCard)
         reservedUnpaidCars.push({
@@ -100,18 +85,17 @@ class CarService {
     return cars;
   }
 
-  async setCarCurrentRun(carId, currentRunId) {
-    await carModel.update({ currentRun: currentRunId, status: RESERVED }, { where: { id: carId } });
-  }
-
-  async removeCurrentRun(carId) {
-    await carModel.update({ currentRun: null, status: FREE }, { where: { id: carId } });
-  }
-
   async remove(filter) {
-    const cars = await carModel.findAll(filter);
+    const cars = await carModel.findAll({ where: filterService.parseFilter(filter) });
 
     for (let car of cars) {
+      const currentRun = await car.getRun();
+
+      if (currentRun) {
+        throw ApiError.BadRequest(
+          `You try to remove car with id '${car.id}', which have the current run '${currentRun.id}'.`
+        );
+      }
       await car.destroy();
     }
 

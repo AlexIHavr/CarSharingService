@@ -99,13 +99,6 @@ const carModel = sequelize.define('Car', {
       },
     },
   },
-  currentRun: {
-    type: DataTypes.UUID,
-    references: {
-      model: runModel,
-      key: 'id',
-    },
-  },
   geoLatitude: {
     type: DataTypes.FLOAT,
     allowNull: false,
@@ -134,6 +127,11 @@ const carModel = sequelize.define('Car', {
       },
     },
   },
+});
+
+//runModel.hasOne(carModel, { foreignKey: { name: 'currentRun', type: DataTypes.UUID }});
+carModel.belongsTo(runModel, {
+  foreignKey: { name: 'currentRun', type: DataTypes.UUID, unique: true },
 });
 
 export default carModel;

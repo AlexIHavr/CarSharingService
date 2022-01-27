@@ -3,12 +3,14 @@ import { GREATER, IN, LESS, NOT_IN, OPERATION } from '../constants/operations.js
 
 class FilterService {
   parseFilter(filter) {
-    return filter.reduce((obj, filterField) => {
-      const keys = Object.keys(filterField);
-      const fieldName = !keys[1] ? keys[0] : keys[1] === OPERATION ? keys[0] : keys[1];
-      obj[fieldName] = this._parseOperation(filterField[fieldName], filterField[OPERATION]);
-      return obj;
-    }, {});
+    return !filter
+      ? {}
+      : filter.reduce((obj, filterField) => {
+          const keys = Object.keys(filterField);
+          const fieldName = !keys[1] ? keys[0] : keys[1] === OPERATION ? keys[0] : keys[1];
+          obj[fieldName] = this._parseOperation(filterField[fieldName], filterField[OPERATION]);
+          return obj;
+        }, {});
   }
 
   _parseOperation(fieldValue, operation) {

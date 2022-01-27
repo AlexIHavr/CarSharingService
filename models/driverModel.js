@@ -46,13 +46,10 @@ const driverModel = sequelize.define('Driver', {
       },
     },
   },
-  creditCard: {
-    type: DataTypes.UUID,
-    references: {
-      model: creditCardModel,
-      key: 'id',
-    },
-  },
+});
+
+driverModel.belongsTo(creditCardModel, {
+  foreignKey: { name: 'creditCard', type: DataTypes.UUID, unique: true },
 });
 
 export default driverModel;

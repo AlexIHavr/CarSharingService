@@ -16,22 +16,6 @@ const bookingModel = sequelize.define('Booking', {
       },
     },
   },
-  car: {
-    type: DataTypes.UUID,
-    allowNull: false,
-    references: {
-      model: carModel,
-      key: 'id',
-    },
-  },
-  run: {
-    type: DataTypes.UUID,
-    allowNull: false,
-    references: {
-      model: runModel,
-      key: 'id',
-    },
-  },
   finishFuelLevel: {
     type: DataTypes.TINYINT,
     allowNull: false,
@@ -56,6 +40,15 @@ const bookingModel = sequelize.define('Booking', {
       },
     },
   },
+});
+
+runModel.belongsToMany(carModel, {
+  through: bookingModel,
+  foreignKey: { name: 'run', type: DataTypes.UUID, allowNull: false },
+});
+carModel.belongsToMany(runModel, {
+  through: bookingModel,
+  foreignKey: { name: 'car', type: DataTypes.UUID, allowNull: false },
 });
 
 export default bookingModel;

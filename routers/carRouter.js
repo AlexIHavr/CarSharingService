@@ -2,7 +2,7 @@ import { Router } from 'express';
 import carController from '../controllers/carController.js';
 import roleMiddleware from '../middlewares/roleMiddleware.js';
 import validationMiddleware from '../middlewares/validationMiddleware.js';
-import { ADMIN, USER } from '../constants/roles.js';
+import { ADMIN } from '../constants/roles.js';
 import validationSchemas from '../schemas/validationSchemas.js';
 
 const carRouter = Router();

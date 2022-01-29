@@ -1,8 +1,8 @@
 import { DataTypes } from 'sequelize';
-import sequelize from '../config/config.js';
+import sequelizeRepository from '../repositories/sequelizeRepository.js';
 import creditCardModel from './creditCardModel.js';
 
-const driverModel = sequelize.define('Driver', {
+const driverModel = sequelizeRepository.sequelize.define('Driver', {
   id: {
     type: DataTypes.UUID,
     primaryKey: true,

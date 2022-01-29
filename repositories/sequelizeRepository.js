@@ -1,15 +1,30 @@
-import sequelize from '../config/config.js';
+import { Sequelize } from 'sequelize';
 
-class SequelizeRepository {
-  static async connectDB() {
+class sequelizeRepository {
+  sequelize;
+
+  constructor() {
+    this.sequelize = this._initDB();
+  }
+
+  async connectDB() {
     try {
-      await sequelize.authenticate();
-      await sequelize.sync();
+      await this.sequelize.authenticate();
+      await this.sequelize.sync();
       console.log(`Connection to DB has been established successfully.`);
     } catch (err) {
       console.error(err);
     }
   }
+
+  _initDB() {
+    const { TYPE_DB, NAME_DB, USER_NAME, PASSWORD, HOST } = process.env;
+
+    return new Sequelize(NAME_DB, USER_NAME, PASSWORD, {
+      host: HOST,
+      dialect: TYPE_DB,
+    });
+  }
 }
 
-export default SequelizeRepository;
+export default new sequelizeRepository();

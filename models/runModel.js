@@ -1,8 +1,8 @@
 import { DataTypes } from 'sequelize';
-import sequelize from '../config/config.js';
+import sequelizeRepository from '../repositories/sequelizeRepository.js';
 import driverModel from './driverModel.js';
 
-const runModel = sequelize.define('Run', {
+const runModel = sequelizeRepository.sequelize.define('Run', {
   id: {
     type: DataTypes.UUID,
     primaryKey: true,

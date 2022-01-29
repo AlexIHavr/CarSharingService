@@ -2,14 +2,10 @@ import ApiError from '../errors/ApiError.js';
 
 const validationMiddleware = (schema) => {
   return function (req, res, next) {
-    const schemaKeys = Array.from(schema._ids._byKey.keys());
-
-    const reqFields = schemaKeys.reduce((obj, field) => {
-      obj[field] = req.body[field];
-      return obj;
-    }, {});
-
-    const { error } = schema.validate(reqFields);
+    const { error } = schema.validate(req.body, {
+      allowUnknown: true,
+      abortEarly: false,
+    });
 
     if (error) {
       return next(ApiError.BadRequest(error.message));

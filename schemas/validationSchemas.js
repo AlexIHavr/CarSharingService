@@ -1,5 +1,5 @@
 import Joi from 'joi';
-import operations from '../constants/operations.js';
+import { Op } from 'sequelize';
 import statuses from '../constants/statuses.js';
 
 class ValidationSchemas {
@@ -17,7 +17,7 @@ class ValidationSchemas {
   }
 
   get carsByFilterSchema() {
-    return this._getCarsByFilterSchema().required();
+    return this._getCarsByFilterSchema();
   }
 
   get carStatusSchema() {
@@ -28,26 +28,35 @@ class ValidationSchemas {
 
   _getCarsByFilterSchema() {
     return Joi.object({
-      filter: Joi.array().items(
-        Joi.object({
-          id: this._getIdSchema(),
-          VIN: Joi.string().trim().length(17),
-          registrationNumber: Joi.string().trim(),
-          brand: Joi.string().trim(),
-          model: Joi.string().trim(),
-          mileage: Joi.number().min(0),
-          currentRun: this._getIdSchema(),
-          productionDate: Joi.date(),
-          status: this._getStatusSchema(),
-          fuelLevel: Joi.number().integer().min(0).max(100),
-          geoLatitude: this._getGeoLatitudeSchema(),
-          geoLongitude: this._getGeoLongitudeSchema(),
-          operation: Joi.string()
-            .trim()
-            .valid(...operations),
-        })
-      ),
+      filter: Joi.object({
+        id: this._getFieldFilterSchema(this._getIdSchema()),
+        VIN: this._getFieldFilterSchema(Joi.string().trim().length(17)),
+        registrationNumber: this._getFieldFilterSchema(Joi.string().trim()),
+        brand: this._getFieldFilterSchema(Joi.string().trim()),
+        model: this._getFieldFilterSchema(Joi.string().trim()),
+        mileage: this._getFieldFilterSchema(Joi.number().min(0)),
+        currentRun: this._getFieldFilterSchema(this._getIdSchema()),
+        productionDate: this._getFieldFilterSchema(Joi.date()),
+        status: this._getFieldFilterSchema(this._getStatusSchema()),
+        fuelLevel: this._getFieldFilterSchema(Joi.number().integer().min(0).max(100)),
+        geoLatitude: this._getFieldFilterSchema(this._getGeoLatitudeSchema()),
+        geoLongitude: this._getFieldFilterSchema(this._getGeoLongitudeSchema()),
+      }).prefs({ allowUnknown: false }),
     });
+  }
+
+  _getFieldFilterSchema(schema) {
+    return Joi.alternatives().try(
+      schema,
+      Joi.object()
+        .pattern(
+          Joi.string()
+            .trim()
+            .valid(...Object.keys(Op)),
+          schema
+        )
+        .prefs({ allowUnknown: false })
+    );
   }
 
   _getGeoLatitudeSchema() {

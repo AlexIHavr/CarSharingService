@@ -1,10 +1,10 @@
 import { DataTypes } from 'sequelize';
-import sequelizeRepository from '../repositories/sequelizeRepository.js';
+import sequelizeRepository from '../../repositories/sequelizeRepository.js';
 import carModel from './carModel.js';
 import runModel from './runModel.js';
 
-const bookingModel = sequelizeRepository.sequelize.define('Booking', {
-  id: {
+const bookingModel = sequelizeRepository.sequelize?.define('Booking', {
+  _id: {
     type: DataTypes.UUID,
     primaryKey: true,
     defaultValue: DataTypes.UUIDV4,
@@ -42,10 +42,10 @@ const bookingModel = sequelizeRepository.sequelize.define('Booking', {
   },
 });
 
-bookingModel.belongsTo(runModel, {
+bookingModel?.belongsTo(runModel, {
   foreignKey: { name: 'run', type: DataTypes.UUID, allowNull: false },
 });
-bookingModel.belongsTo(carModel, {
+bookingModel?.belongsTo(carModel, {
   foreignKey: { name: 'car', type: DataTypes.UUID, allowNull: false },
 });
 

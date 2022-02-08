@@ -1,9 +1,9 @@
 import { DataTypes } from 'sequelize';
-import sequelizeRepository from '../repositories/sequelizeRepository.js';
+import sequelizeRepository from '../../repositories/sequelizeRepository.js';
 import driverModel from './driverModel.js';
 
-const runModel = sequelizeRepository.sequelize.define('Run', {
-  id: {
+const runModel = sequelizeRepository.sequelize?.define('Run', {
+  _id: {
     type: DataTypes.UUID,
     primaryKey: true,
     defaultValue: DataTypes.UUIDV4,
@@ -45,7 +45,7 @@ const runModel = sequelizeRepository.sequelize.define('Run', {
   },
 });
 
-runModel.belongsTo(driverModel, {
+runModel?.belongsTo(driverModel, {
   foreignKey: { name: 'driver', type: DataTypes.UUID, allowNull: false },
 });
 

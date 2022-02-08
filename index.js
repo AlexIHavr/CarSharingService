@@ -1,10 +1,10 @@
 import express from 'express';
 import helmet from 'helmet';
 import './config/config.js';
-import sequelizeRepository from './repositories/sequelizeRepository.js';
 import baseRouter from './routers/baseRouter.js';
 import errorMiddleware from './middlewares/errorMiddleware.js';
-import sqlErrorMiddleware from './middlewares/sqlErrorMiddleware.js';
+import dbErrorMiddleware from './middlewares/dbErrorMiddleware.js';
+import DATA_BASE from './constants/dataBases.js';
 
 const app = express();
 
@@ -13,10 +13,10 @@ app.use(helmet());
 
 app.use(baseRouter);
 
-app.use(sqlErrorMiddleware);
+app.use(dbErrorMiddleware);
 app.use(errorMiddleware);
 
 app.listen(process.env.PORT, async () => {
-  await sequelizeRepository.connectDB();
+  await DATA_BASE.connect();
   console.log(`Server has been started on port ${process.env.PORT} ...`);
 });

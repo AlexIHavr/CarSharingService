@@ -1,11 +1,11 @@
+import DATA_BASE from '../constants/dataBases.js';
 import { FREE, RESERVED } from '../constants/statuses.js';
 import ApiError from '../errors/ApiError.js';
-import carModel from '../models/carModel.js';
-import runModel from '../models/runModel.js';
+import modelRepository from '../repositories/modelRepository.js';
 
 class RunService {
   async add(data) {
-    const car = await carModel.findByPk(data.carId);
+    const car = await DATA_BASE.findById(modelRepository.carModel, data.carId);
 
     if (!car) {
       throw ApiError.BadRequest('Car does not exist.');
@@ -15,10 +15,15 @@ class RunService {
       throw ApiError.BadRequest('Cars must be free.');
     }
 
-    const newRun = await runModel.create(data);
-    await car.setRun(newRun);
+    //only in mongoose
+    const driver = await DATA_BASE.findById(modelRepository.driverModel, data.driver);
+    if (!driver) {
+      throw ApiError.BadRequest('Driver does not exist.');
+    }
 
-    await car.update({ status: RESERVED });
+    const newRun = await DATA_BASE.create(modelRepository.runModel, data);
+
+    await DATA_BASE.updateOne(car, { currentRun: newRun._id, status: RESERVED });
 
     return newRun;
   }

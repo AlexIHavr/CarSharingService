@@ -1,9 +1,9 @@
 import { DataTypes } from 'sequelize';
-import sequelizeRepository from '../repositories/sequelizeRepository.js';
+import sequelizeRepository from '../../repositories/sequelizeRepository.js';
 import creditCardModel from './creditCardModel.js';
 
-const driverModel = sequelizeRepository.sequelize.define('Driver', {
-  id: {
+const driverModel = sequelizeRepository.sequelize?.define('Driver', {
+  _id: {
     type: DataTypes.UUID,
     primaryKey: true,
     defaultValue: DataTypes.UUIDV4,
@@ -48,7 +48,7 @@ const driverModel = sequelizeRepository.sequelize.define('Driver', {
   },
 });
 
-driverModel.belongsTo(creditCardModel, {
+driverModel?.belongsTo(creditCardModel, {
   foreignKey: { name: 'creditCard', type: DataTypes.UUID, unique: true },
 });
 

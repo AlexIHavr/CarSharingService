@@ -1,5 +1,4 @@
 import Joi from 'joi';
-import { Op } from 'sequelize';
 import statuses from '../constants/statuses.js';
 
 class ValidationSchemas {
@@ -29,7 +28,7 @@ class ValidationSchemas {
   _getCarsByFilterSchema() {
     return Joi.object({
       filter: Joi.object({
-        id: this._getFieldFilterSchema(this._getIdSchema()),
+        _id: this._getFieldFilterSchema(this._getIdSchema()),
         VIN: this._getFieldFilterSchema(Joi.string().trim().length(17)),
         registrationNumber: this._getFieldFilterSchema(Joi.string().trim()),
         brand: this._getFieldFilterSchema(Joi.string().trim()),
@@ -46,17 +45,7 @@ class ValidationSchemas {
   }
 
   _getFieldFilterSchema(schema) {
-    return Joi.alternatives().try(
-      schema,
-      Joi.object()
-        .pattern(
-          Joi.string()
-            .trim()
-            .valid(...Object.keys(Op)),
-          schema
-        )
-        .prefs({ allowUnknown: false })
-    );
+    return Joi.alternatives().try(schema, Joi.object().prefs({ allowUnknown: false }));
   }
 
   _getGeoLatitudeSchema() {
@@ -74,7 +63,12 @@ class ValidationSchemas {
   }
 
   _getIdSchema() {
-    return Joi.string().trim().guid({ version: 'uuidv4' });
+    return Joi.alternatives().try(
+      Joi.string().trim().guid({ version: 'uuidv4' }),
+      Joi.string()
+        .trim()
+        .pattern(/^[0-9a-fA-F]{24}$/)
+    );
   }
 }
 

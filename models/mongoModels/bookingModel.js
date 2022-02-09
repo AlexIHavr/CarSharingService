@@ -33,4 +33,6 @@ const BookingSchema = new mongoose.Schema({
   },
 });
 
+BookingSchema.index({ run: 1, car: 1 }, { unique: true });
+
 export default mongoose.model('Booking', BookingSchema);

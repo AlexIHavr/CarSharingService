@@ -3,7 +3,7 @@ import sequelizeRepository from '../../repositories/sequelizeRepository.js';
 import carModel from './carModel.js';
 import runModel from './runModel.js';
 
-const bookingModel = sequelizeRepository.sequelize?.define('Booking', {
+const bookingModel = sequelizeRepository.sequelize.define('Booking', {
   _id: {
     type: DataTypes.UUID,
     primaryKey: true,
@@ -42,10 +42,10 @@ const bookingModel = sequelizeRepository.sequelize?.define('Booking', {
   },
 });
 
-bookingModel?.belongsTo(runModel, {
+bookingModel.belongsTo(runModel, {
   foreignKey: { name: 'run', type: DataTypes.UUID, allowNull: false },
 });
-bookingModel?.belongsTo(carModel, {
+bookingModel.belongsTo(carModel, {
   foreignKey: { name: 'car', type: DataTypes.UUID, allowNull: false },
 });
 

@@ -1,4 +1,4 @@
-import DATA_BASE from '../constants/dataBases.js';
+import dbRepository from '../repositories/index.js';
 import { IN_USE, RESERVED } from '../constants/statuses.js';
 import ApiError from '../errors/ApiError.js';
 import modelRepository from '../repositories/modelRepository.js';
@@ -6,12 +6,12 @@ import filterService from './filterService.js';
 
 class CarService {
   async add(data) {
-    const newCar = await DATA_BASE.create(modelRepository.carModel, data);
+    const newCar = await dbRepository.create(modelRepository.carModel, data);
     return newCar;
   }
 
   async setStatus({ status, filter }) {
-    let cars = await DATA_BASE.find(modelRepository.carModel, filterService.parseFilter(filter));
+    let cars = await dbRepository.find(modelRepository.carModel, filterService.parseFilter(filter));
 
     for (let car of cars) {
       if (car.status === IN_USE) {
@@ -19,12 +19,12 @@ class CarService {
       }
 
       if (status === IN_USE) {
-        const currentRun = await DATA_BASE.getRef(car, 'currentRun');
+        const currentRun = await dbRepository.getRef(car, 'currentRun');
         if (!currentRun) {
           throw ApiError.BadRequest(`Car with id '${car._id}' has not current run.`);
         }
 
-        const driver = await DATA_BASE.getRef(currentRun, 'driver');
+        const driver = await dbRepository.getRef(currentRun, 'driver');
         if (!driver.creditCard) {
           throw ApiError.BadRequest(
             `Credit card of driver with id '${driver._id}' has not been authorized.`
@@ -32,26 +32,29 @@ class CarService {
         }
       }
 
-      await DATA_BASE.updateOne(car, { status });
+      await dbRepository.updateOne(car, { status });
     }
 
     return cars;
   }
 
   async getCarsByFilter(filter) {
-    const cars = await DATA_BASE.find(modelRepository.carModel, filterService.parseFilter(filter));
+    const cars = await dbRepository.find(
+      modelRepository.carModel,
+      filterService.parseFilter(filter)
+    );
 
     return cars;
   }
 
   async getReservedUnpaid() {
-    const reservedCars = await DATA_BASE.find(modelRepository.carModel, { status: RESERVED });
+    const reservedCars = await dbRepository.find(modelRepository.carModel, { status: RESERVED });
 
     const reservedUnpaidCars = [];
 
     for (const car of reservedCars) {
-      const currentRun = await DATA_BASE.getRef(car, 'currentRun');
-      const driver = await DATA_BASE.getRef(currentRun, 'driver');
+      const currentRun = await dbRepository.getRef(car, 'currentRun');
+      const driver = await dbRepository.getRef(currentRun, 'driver');
 
       if (!driver.creditCard)
         reservedUnpaidCars.push({
@@ -68,7 +71,10 @@ class CarService {
   }
 
   async setCoordinates({ filter, latitude, longitude }) {
-    const cars = await DATA_BASE.find(modelRepository.carModel, filterService.parseFilter(filter));
+    const cars = await dbRepository.find(
+      modelRepository.carModel,
+      filterService.parseFilter(filter)
+    );
 
     for (let car of cars) {
       car.geoLatitude = latitude;
@@ -81,10 +87,13 @@ class CarService {
   }
 
   async remove(filter) {
-    const cars = await DATA_BASE.find(modelRepository.carModel, filterService.parseFilter(filter));
+    const cars = await dbRepository.find(
+      modelRepository.carModel,
+      filterService.parseFilter(filter)
+    );
 
     for (let car of cars) {
-      const currentRun = await DATA_BASE.getRef(car, 'currentRun');
+      const currentRun = await dbRepository.getRef(car, 'currentRun');
 
       if (currentRun) {
         throw ApiError.BadRequest(
@@ -92,7 +101,7 @@ class CarService {
         );
       }
 
-      await DATA_BASE.deleteOne(car);
+      await dbRepository.deleteOne(car);
     }
 
     return cars;

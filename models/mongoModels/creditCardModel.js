@@ -1,11 +1,12 @@
 import cardValidator from 'card-validator';
 import mongoose from 'mongoose';
 
-const creditCardModel = new mongoose.Schema({
+const CreditCardSchema = new mongoose.Schema({
   cardNumber: {
     type: String,
     required: true,
     trim: true,
+    unique: true,
     validate: {
       validator: (value) => cardValidator.number(value).isValid,
       message: 'Invalid credit card',
@@ -21,7 +22,7 @@ const creditCardModel = new mongoose.Schema({
     },
   },
   cardValidDate: {
-    type: Date,
+    type: String,
     required: true,
     trim: true,
     validate: {
@@ -31,4 +32,4 @@ const creditCardModel = new mongoose.Schema({
   },
 });
 
-export default mongoose.model('CreditCard', creditCardModel);
+export default mongoose.model('CreditCard', CreditCardSchema);

@@ -3,7 +3,7 @@ import statuses from '../../constants/statuses.js';
 import sequelizeRepository from '../../repositories/sequelizeRepository.js';
 import runModel from './runModel.js';
 
-const carModel = sequelizeRepository.sequelize?.define('Car', {
+const carModel = sequelizeRepository.sequelize.define('Car', {
   _id: {
     type: DataTypes.UUID,
     primaryKey: true,
@@ -129,7 +129,7 @@ const carModel = sequelizeRepository.sequelize?.define('Car', {
   },
 });
 
-carModel?.belongsTo(runModel, {
+carModel.belongsTo(runModel, {
   foreignKey: { name: 'currentRun', type: DataTypes.UUID, unique: true },
   as: 'CurrentRun',
 });

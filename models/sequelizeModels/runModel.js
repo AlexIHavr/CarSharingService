@@ -1,9 +1,9 @@
 import { DataTypes } from 'sequelize';
-import sequelizeRepository from '../repositories/sequelizeRepository.js';
+import sequelizeRepository from '../../repositories/sequelizeRepository.js';
 import driverModel from './driverModel.js';
 
 const runModel = sequelizeRepository.sequelize.define('Run', {
-  id: {
+  _id: {
     type: DataTypes.UUID,
     primaryKey: true,
     defaultValue: DataTypes.UUIDV4,

@@ -1,11 +1,11 @@
+import dbRepository from '../repositories/index.js';
 import { FREE, RESERVED } from '../constants/statuses.js';
 import ApiError from '../errors/ApiError.js';
-import carModel from '../models/carModel.js';
-import runModel from '../models/runModel.js';
+import modelRepository from '../repositories/modelRepository.js';
 
 class RunService {
   async add(data) {
-    const car = await carModel.findByPk(data.carId);
+    const car = await dbRepository.findById(modelRepository.carModel, data.carId);
 
     if (!car) {
       throw ApiError.BadRequest('Car does not exist.');
@@ -15,10 +15,9 @@ class RunService {
       throw ApiError.BadRequest('Cars must be free.');
     }
 
-    const newRun = await runModel.create(data);
-    await car.setRun(newRun);
+    const newRun = await dbRepository.create(modelRepository.runModel, data);
 
-    await car.update({ status: RESERVED });
+    await dbRepository.updateOne(car, { currentRun: newRun._id, status: RESERVED });
 
     return newRun;
   }

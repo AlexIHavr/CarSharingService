@@ -1,8 +1,9 @@
-import driverModel from '../models/driverModel.js';
+import dbRepository from '../repositories/index.js';
+import modelRepository from '../repositories/modelRepository.js';
 
 class DriverService {
   async add(data) {
-    const newDriver = await driverModel.create(data);
+    const newDriver = await dbRepository.create(modelRepository.driverModel, data);
     return newDriver;
   }
 }

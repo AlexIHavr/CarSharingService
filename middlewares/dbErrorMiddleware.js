@@ -1,6 +1,7 @@
 import ApiError from '../errors/ApiError.js';
 
-const sqlErrorMiddleware = (err, req, res, next) => {
+const dbErrorMiddleware = (err, req, res, next) => {
+  console.log(err);
   switch (err.name) {
     case 'SequelizeValidationError':
     case 'SequelizeUniqueConstraintError':
@@ -8,11 +9,13 @@ const sqlErrorMiddleware = (err, req, res, next) => {
       break;
 
     case 'SequelizeForeignKeyConstraintError':
-      err = ApiError.BadRequest(`Id of ${err.fields[0]} does not exist.`);
+    case 'ValidationError':
+    case 'CastError':
+      err = ApiError.BadRequest(err.message);
       break;
   }
 
   next(err);
 };
 
-export default sqlErrorMiddleware;
+export default dbErrorMiddleware;

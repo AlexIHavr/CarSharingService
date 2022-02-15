@@ -1,11 +1,16 @@
+import dbRepository from '../repositories/index.js';
 import { FREE } from '../constants/statuses.js';
-import bookingModel from '../models/bookingModel.js';
-import carModel from '../models/carModel.js';
+import modelRepository from '../repositories/modelRepository.js';
 
 class BookingService {
   async add(data) {
-    const newBooking = await bookingModel.create(data);
-    await carModel.update({ currentRun: null, status: FREE }, { where: { id: data.car } });
+    const newBooking = await dbRepository.create(modelRepository.bookingModel, data);
+
+    await dbRepository.updateOneByFilter(
+      modelRepository.carModel,
+      { currentRun: null, status: FREE },
+      { _id: data.car }
+    );
     return newBooking;
   }
 }
